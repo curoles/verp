@@ -10,10 +10,10 @@ License::      Distributed under the Boost Software License, Version 1.0.
 
 =end
 
-puts "Ruby version: #{RUBY_VERSION}"
+#puts "Ruby version: #{RUBY_VERSION}"
 
 require_relative 'VerpVersion'
-puts "Verilog ERB Pre-Processor #{Verp::VERSION}"
+#puts "Verilog ERB Pre-Processor #{Verp::VERSION}"
 
 require 'logger'
 
@@ -29,11 +29,12 @@ class Main < Logger::Application
     level=DEBUG
     options = Verp::Options.parse(@log, args)
     set_log(options.log)
+    @log.debug("Options: #{options}")
     @processor = Verp::Processor.new(@log, options)
   end
 
   def run
-    
+    @processor.run 
     @log.debug("Exiting VERP, bye!")
   end
 

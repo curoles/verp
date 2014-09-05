@@ -24,6 +24,8 @@ class Options
     # We set default values here.
     options = OpenStruct.new
     options.log = 'vert.log'
+    options.inputs = []
+    options.outputfile = STDOUT
 
     opt_parser = OptionParser.new do |opts|
       opts.banner = "Usage: verp-run.rb [options]"
@@ -33,6 +35,11 @@ class Options
 
       opts.on("-l", "--log FILE", "Log file") do |file|
         options.log = file
+      end
+
+      opts.on("-o", "--output FILE", "Output file") do |filename|
+        new_output_file = File.open(filename, "w")
+        options.outputfile = new_output_file if new_output_file
       end
 
       opts.separator ""
@@ -47,12 +54,17 @@ class Options
 
       # Typical switch to print the version.
       opts.on_tail("--version", "Show version") do
-        puts Verp::VERSION
+        puts "Ruby version: #{RUBY_VERSION}"
+        puts "Verilog ERB Pre-Processor version #{Verp::VERSION}"
         exit
       end
     end
 
     opt_parser.parse!(args)
+
+    # Not parsed options must be input file names
+    args.each{ |fn| options.inputs << fn }
+
     options
   end  # parse()
 
