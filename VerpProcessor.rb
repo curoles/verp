@@ -36,9 +36,23 @@ class Processor
       puts "File does not exist: #{filename}"
       return false
     end
-    renderer = ERB.new(File.read(filename), 0, '%><>-')
-    translator = Verp::TranslationObject.new(filename)
-    output = renderer.result(translator.get_binding)
+    template = File.read(filename)
+    renderer = ERB.new(template, 0, '%><>-')
+    translator = Verp::TranslationObject.new(filename, self)
+    output = 'something went wrong if you see this'
+    begin
+      output = renderer.result(translator.get_binding)
+    rescue Verp::VerificationError => failure
+      errline = failure.backtrace.grep(/^\(erb\)/)[0].split(':')[1].to_i
+      errline_text = template.split("\n")[errline-1]
+      output = "Assertion failed: #{failure.message}, line #{errline}: #{errline_text}"
+    rescue RuntimeError => e
+      output = "Runtime error: #{e.message}"
+    rescue NoMethodError => e
+      output = "Undefined method: #{e.message}"
+    ensure
+      #
+    end
     @option.outputfile.puts output
     true
   end
