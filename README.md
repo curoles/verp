@@ -15,6 +15,8 @@ What VERP can do for you:
   copy-paste hazard.
 + VERP provides basic helpers functions (API) to help you, for example,
   assertions and other checkers.
++ Automatically connect modules (IPs) when interface metadata information
+  is provided.
 + VERP can be extended to use your custom Ruby scripts and ERB templates
   to generate Verilog code. So it can serve as centralized place to keep
   useful scripts and best practices.
@@ -266,7 +268,7 @@ endmodule
 
 If call it with the default parameters: `verp-run.rb "../verp/hwlib/Dff.erb.v`, then output Verilog code
 for plain D flip-flop will look:
-```verilog
+```
 /** D flip-flop module Dff
  *  Clock edge : posedge
  *  Gated clock: false
@@ -322,3 +324,8 @@ module MyDff
 
 endmodule
 ```
+
+Connect modules automatically
+-----------------------------
+
+TODO
