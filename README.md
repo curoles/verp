@@ -234,7 +234,7 @@ This example shows how to use VERP HW Library templates and at the same time
 demostrates how user can design his own library of Verilog template modules.
 
 Code for D flip-flop template from VERP HW Library:
-```ruby
+```
 %# Dff parameters:
 % Name         = 'Dff' unless defined? Name
 % Posedge      = true  unless defined? Posedge
@@ -268,7 +268,7 @@ endmodule
 
 If call it with the default parameters: `verp-run.rb "../verp/hwlib/Dff.erb.v`, then output Verilog code
 for plain D flip-flop will look:
-```
+```verilog
 /** D flip-flop module Dff
  *  Clock edge : posedge
  *  Gated clock: false
