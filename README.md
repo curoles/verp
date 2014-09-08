@@ -224,3 +224,101 @@ Output will look like following:
 // This Verilog code is to be mixed into something
 a = 777
 ```
+
+Example: VERP D flip-flop HW Library template
+-------------------------------------------------
+
+This example shows how to use VERP HW Library templates and at the same time
+demostrates how user can design his own library of Verilog template modules.
+
+Code for D flip-flop template from VERP HW Library:
+```ruby
+%# Dff parameters:
+% Name         = 'Dff' unless defined? Name
+% Posedge      = true  unless defined? Posedge
+% Gated_clk    = false unless defined? Gated_clk
+% Enabled_data = false unless defined? Enabled_data
+% Has_reset    = false unless defined? Has_reset
+% Async_reset  = false unless defined? Async_reset
+%#
+% edge = Posedge ? 'posedge' : 'negedge'
+
+module <%=Name%> 
+#(parameter WIDTH = 1)
+(
+   input  [WIDTH-1:0] d
+  ,input              clk
+  ,output reg [WIDTH-1:0] q
+<%if Gated_clk%>  ,input clk_enable<%;end%>
+<%if Enabled_data%>  ,input enable<%;end%>
+);
+
+  wire clk_signal = clk<%if Gated_clk then%> && clk_enable<%;end%>;
+
+  always @(<%=edge%> clk_signal<%if Async_reset%> or <%=edge%> reset<%;end%>)
+  begin
+<%if Has_reset%>    if (reset) q[WIDTH-1:0] <= 'h0; else<%;end-%>
+    <%if Enabled_data%>if (enable) <%;end%>q[WIDTH-1:0] <= d[WIDTH-1:0];
+  end
+
+endmodule
+```
+
+If call it with the default parameters: `verp-run.rb "../verp/hwlib/Dff.erb.v`, then output Verilog code
+for plain D flip-flop will look:
+```verilog
+/** D flip-flop module Dff
+ *  Clock edge : posedge
+ *  Gated clock: false
+ *  Data enable: false
+ *  Reset      : no
+ */
+module Dff 
+#(parameter WIDTH = 1)
+(
+   input  [WIDTH-1:0] d
+  ,input              clk
+  ,output reg [WIDTH-1:0] q
+);
+
+  wire clk_signal = clk;
+
+  always @(posedge clk_signal)
+  begin
+    q[WIDTH-1:0] <= d[WIDTH-1:0];
+  end
+
+endmodule
+```
+
+To parameterize Dff generation we will:
++ give to `verp-run.rb` string argument with ERB code initializing Dff template parameters
++ mix-in Dff template at the end of the string
+
+`verp-run.rb -s "<%Name='MyDff';Posedge=false;Has_reset=true;Gated_clk=true;mixin '../verp/hwlib/Dff.erb.v'%>"`
+
+The output for falling clock Dff with synchronous reset:
+```verilog
+/** D flip-flop module MyDff
+ *  Clock edge : negedge
+ *  Gated clock: true
+ *  Data enable: false
+ *  Reset      : async=false
+ */
+module MyDff 
+#(parameter WIDTH = 1)
+(
+   input  [WIDTH-1:0] d
+  ,input              clk
+  ,output reg [WIDTH-1:0] q
+  ,input clk_enable  ,input reset);
+
+  wire clk_signal = clk && clk_enable;
+
+  always @(negedge clk_signal)
+  begin
+    if (reset) q[WIDTH-1:0] <= 'h0; else    q[WIDTH-1:0] <= d[WIDTH-1:0];
+  end
+
+endmodule
+```

@@ -26,8 +26,13 @@ class Processor
   def run
     @log.debug('Start')
     @option.inputs.each do |input|
-      @log.debug("input: #{input}")
-      process_file input
+      if input.file
+        @log.debug("input file: #{input.data}")
+        process_file input.data
+      else
+        @log.debug("input string: #{input.data}")
+        process_template(input.data, '_input_string_')
+      end
     end
   end
 
@@ -37,6 +42,10 @@ class Processor
       return false
     end
     template = File.read(filename)
+    process_template(template, filename)
+  end
+
+  def process_template(template, filename = 'ERB')
     renderer = ERB.new(template, 0, '%><>-')
     translator = Verp::TranslationObject.new(filename, self)
     output = 'something went wrong if you see this'

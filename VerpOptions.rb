@@ -42,6 +42,14 @@ class Options
         options.outputfile = new_output_file if new_output_file
       end
 
+      opts.on("-i", "--input FILE", "Input file") do |filename|
+        options.inputs << OpenStruct.new(:file => true, :data => filename)
+      end
+
+      opts.on("-s", "--input-string TEXT", "Input string") do |text|
+        options.inputs << OpenStruct.new(:file => false, :data => text)
+      end
+
       opts.separator ""
       opts.separator "Common options:"
 
@@ -63,7 +71,7 @@ class Options
     opt_parser.parse!(args)
 
     # Not parsed options must be input file names
-    args.each{ |fn| options.inputs << fn }
+    args.each{ |fn| options.inputs << OpenStruct.new(:file => true, :data => fn) }
 
     options
   end  # parse()

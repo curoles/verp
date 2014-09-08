@@ -8,37 +8,38 @@
  */
 
 %# Dff parameters:
-% name         ||= 'Dff'
-% posedge      ||= true
-% gated_clk    ||= false
-% enabled_data ||= false
-% has_reset    ||= false
-% async_reset  ||= false
+% Name         = 'Dff' unless defined? Name
+% Posedge      = true  unless defined? Posedge
+% Gated_clk    = false unless defined? Gated_clk
+% Enabled_data = false unless defined? Enabled_data
+% Has_reset    = false unless defined? Has_reset
+% Async_reset  = false unless defined? Async_reset
 %#
-% edge = posedge ? 'posedge' : 'negedge'
+% edge = Posedge ? 'posedge' : 'negedge'
 
-/** D flip-flop module <%=name%>
+/** D flip-flop module <%=Name%>
  *  Clock edge : <%=edge%>
- *  Gated clock: <%=gated_clk.to_s%>
- *  Data enable: <%=async_reset.to_s%>
- *  Reset      : <%=if has_reset then "async=#{async_reset}" else "no" end%>
+ *  Gated clock: <%=Gated_clk.to_s%>
+ *  Data enable: <%=Async_reset.to_s%>
+ *  Reset      : <%=if Has_reset then "async=#{Async_reset}" else "no" end%>
  */
-module <%=name%> 
+module <%=Name%> 
 #(parameter WIDTH = 1)
 (
    input  [WIDTH-1:0] d
   ,input              clk
   ,output reg [WIDTH-1:0] q
-<%if gated_clk%>  ,input clk_enable<%;end%>
-<%if enabled_data%>  ,input enable<%;end%>
+<%if Gated_clk%>  ,input clk_enable<%;end-%>
+<%if Enabled_data%>  ,input enable<%;end-%>
+<%if Has_reset%>  ,input reset<%;end-%>
 );
 
-  wire clk_signal = clk<%if gated_clk then%> && clk_enable<%;end%>;
+  wire clk_signal = clk<%if Gated_clk then%> && clk_enable<%;end%>;
 
-  always @(<%=edge%> clk_signal<%if async_reset%> or <%=edge%> reset<%;end%>)
+  always @(<%=edge%> clk_signal<%if Async_reset%> or <%=edge%> reset<%;end%>)
   begin
-<%if has_reset%>    if (reset) q[WIDTH-1:0] <= 'h0; else<%;end-%>
-    <%if enabled_data%>if (enable) <%;end%>q[WIDTH-1:0] <= d[WIDTH-1:0];
+<%if Has_reset%>    if (reset) q[WIDTH-1:0] <= 'h0; else<%;end-%>
+    <%if Enabled_data%>if (enable) <%;end%>q[WIDTH-1:0] <= d[WIDTH-1:0];
   end
 
 endmodule
