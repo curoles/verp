@@ -12,13 +12,13 @@ License::      Distributed under the Boost Software License, Version 1.0.
 
 #puts "Ruby version: #{RUBY_VERSION}"
 
-require_relative 'VerpVersion'
+require_relative '../lib/VerpVersion'
 #puts "Verilog ERB Pre-Processor #{Verp::VERSION}"
 
 require 'logger'
 
-require_relative 'VerpProcessor'
-require_relative 'VerpOptions'
+require_relative '../lib/VerpProcessor'
+require_relative '../lib/VerpOptions'
 
 module Verp
 
