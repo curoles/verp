@@ -19,13 +19,13 @@ class Processor
 
   def initialize(log, options)
     @log = log
-    @log.debug("Command line options: #{options}")
-    @option = options
+    #@log.debug("Command line options: #{options}")
+    @options = options
   end
 
   def run
-    @log.debug('Start')
-    @option.inputs.each do |input|
+    @log.debug('Start processing')
+    @options.inputs.each do |input|
       if input.file
         @log.debug("input file: #{input.data}")
         process_file input.data
@@ -34,6 +34,7 @@ class Processor
         process_template(input.data, '_input_string_')
       end
     end
+    true #TODO
   end
 
   def process_file(filename)
@@ -47,7 +48,7 @@ class Processor
 
   def process_template(template, filename = 'ERB')
     renderer = ERB.new(template, 0, '%><>-')
-    translator = Verp::TranslationObject.new(filename, self)
+    translator = Verp::TranslationObject.new(filename, @options, @log, self)
     output = 'something went wrong if you see this'
     begin
       output = renderer.result(translator.get_binding)
@@ -62,7 +63,7 @@ class Processor
     ensure
       #
     end
-    @option.outputfile.puts output
+    @options.outputfile.puts output
     true
   end
 

@@ -39,8 +39,10 @@ class TranslationObject
 
   attr_reader :input_file_name
 
-  def initialize(input_filename, processor)
+  def initialize(input_filename, options, log, processor)
     @input_file_name = input_filename
+    @options = options
+    @log = log
     @processor = processor
   end
 
@@ -49,16 +51,31 @@ class TranslationObject
   end
 
   def include_definition(filename)
-    File.open(filename, "r") do |file|
+    path = find_file filename
+    @log.debug("include file: #{path}")
+    return false if path.nil?
+    File.open(path, "r") do |file|
       text = file.read
       instance_eval(text)
     end
+    true
   end
 
   def mixin(filename)
-    @processor.process_file filename
+    path = find_file filename
+    @log.debug("mixin file: #{path}")
+    return false if path.nil?
+
+    @processor.process_file path
   end
 
+  def find_file(filename)
+    for incdir in @options.includes
+      path = File.join(incdir, filename)
+      return path if File.exist?(path)
+    end
+    nil
+  end
 end
 
 end

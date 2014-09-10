@@ -29,13 +29,15 @@ class Main < Logger::Application
     level=DEBUG
     options = Verp::Options.parse(@log, args)
     set_log(options.log)
+    @log.debug("Ruby version: #{RUBY_VERSION}")
+    @log.debug("Verilog ERB Pre-Processor version: #{Verp::VERSION}")
     @log.debug("Options: #{options}")
     @processor = Verp::Processor.new(@log, options)
   end
 
   def run
     @processor.run 
-    @log.debug("Exiting VERP, bye!")
+    #@log.debug("Exiting VERP, bye!")
   end
 
   def trap_signal_INT(signo)

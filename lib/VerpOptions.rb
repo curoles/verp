@@ -25,7 +25,8 @@ class Options
     options = OpenStruct.new
     options.log = 'vert.log'
     options.inputs = []
-    options.outputfile = STDOUT
+    options.outputfile = $stdout
+    options.includes = ['.']
 
     opt_parser = OptionParser.new do |opts|
       opts.banner = "Usage: verp-run.rb [options]"
@@ -50,11 +51,14 @@ class Options
         options.inputs << OpenStruct.new(:file => false, :data => text)
       end
 
+      opts.on("-I", "--include PATH", "Include directory") do |path|
+        options.includes << path
+      end
+
       opts.separator ""
       opts.separator "Common options:"
 
       # No argument, shows at tail.  This will print an options summary.
-      # Try it and see!
       opts.on_tail("-h", "--help", "Show this message") do
         puts opts
         exit
