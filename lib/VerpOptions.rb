@@ -27,6 +27,7 @@ class Options
     options.inputs = []
     options.outputfile = $stdout
     options.includes = ['.']
+    options.auto = false
 
     opt_parser = OptionParser.new do |opts|
       opts.banner = "Usage: verp-run.rb [options]"
@@ -53,6 +54,10 @@ class Options
 
       opts.on("-I", "--include PATH", "Include directory") do |path|
         options.includes << path
+      end
+
+      opts.on("-a", "--[no-]auto", "Auto connecting") do |auto|
+        options.auto = auto
       end
 
       opts.separator ""

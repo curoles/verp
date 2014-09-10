@@ -12,6 +12,7 @@ require 'logger'
 require 'erb'
 
 require_relative 'VerpMethods'
+require_relative 'AutoConnect'
 
 module Verp
 
@@ -52,6 +53,9 @@ class Processor
     output = 'something went wrong if you see this'
     begin
       output = renderer.result(translator.get_binding)
+      if @options.auto then
+        output = Verp::AutoConnect.new(@options, @log).run(output)
+      end
     rescue Verp::VerificationError => failure
       errline = failure.backtrace.grep(/^\(erb\)/)[0].split(':')[1].to_i
       errline_text = template.split("\n")[errline-1]
