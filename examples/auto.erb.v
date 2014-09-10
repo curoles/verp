@@ -1,4 +1,4 @@
-// Demonstrate Auto-Connect features
+// // Demonstrate Auto-Connect features
 
 module DffTester(input in, out);
 
