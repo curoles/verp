@@ -178,6 +178,9 @@ class VerilogAnalyzer
         wire_name = tok(pos-1)[:s]
         wire = vmodule[:wires].select{|wire| wire[:name] == wire_name }
         wire[0][:dir] = s
+      when 'wire'
+        #TODO can be pin or internal wire
+      #when id and then another id
       end
       pos += 1
     end
