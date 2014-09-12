@@ -121,7 +121,10 @@ class VerilogAnalyzer
     module_begin, module_end = vmodule[:token_from], vmodule[:token_to] 
     declaration_end = nil
     module_begin.upto(module_end) do |token_id|
-      declaration_end = token_id if @tokens[token_id][:s] == ';'
+      if @tokens[token_id][:s] == ';'
+        declaration_end = token_id
+        break
+      end
     end
 
     report_Verilog_syntax_error(
@@ -163,6 +166,21 @@ class VerilogAnalyzer
   end
 
   def analyze_definition(vmodule, token_from, token_to)
+    pos = token_from
+    while pos < token_to
+      s = tok(pos)[:s]
+      case s
+      when 'input', 'output'
+        name_pos=pos
+        while name_pos < token_to and tok(pos)[:s] != ';'
+          pos += 1
+        end
+        wire_name = tok(pos-1)[:s]
+        wire = vmodule[:wires].select{|wire| wire[:name] == wire_name }
+        wire[0][:dir] = s
+      end
+      pos += 1
+    end
   end
 
   def report_Verilog_syntax_error(message)
