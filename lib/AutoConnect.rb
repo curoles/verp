@@ -18,7 +18,7 @@ class VerilogScanner
   LineComment = /\/{2}.*$/
   BlockComment = /\/\*.*?\*\//m
   Keywords = ['module', 'endmodule', 'input', 'output', 'inout', 'reg', 'always',
-    'begin', 'end', 'if', 'else']
+    'begin', 'end', 'if', 'else', 'parameter', 'posedge', 'negedge']
 
   def initialize(string)
     @string = string
@@ -86,6 +86,8 @@ end
 
 class VerilogAnalyzer
 
+  attr_reader :vmodules
+
   def initialize
     @tokens = []
     @vmodules = []
@@ -110,7 +112,7 @@ class VerilogAnalyzer
     @tokens.each_with_index do |token, id|
       found, found_id = true, id if token[:type] == :keyword and token[:s] == 'module'
       if found and token[:type] == :keyword and token[:s] == 'endmodule' then
-        vmodules << {:token_from => found_id, :token_to => id}
+        vmodules << {:local => true, :token_from => found_id, :token_to => id}
         found, found_id = false, -1
       end
     end
@@ -131,6 +133,7 @@ class VerilogAnalyzer
       "module declaration no trailing ';': #{@tokens[module_begin]}") if not declaration_end
 
     vmodule[:wires] = []
+    vmodule[:submodules] = []
     analyze_declaration(vmodule, module_begin, declaration_end)
     analyze_definition(vmodule, declaration_end + 1, module_end)
   end
@@ -169,8 +172,8 @@ class VerilogAnalyzer
     pos = token_from
     while pos < token_to
       s = tok(pos)[:s]
-      case s
-      when 'input', 'output'
+      case
+      when ['input', 'output'].include?(s)
         name_pos=pos
         while name_pos < token_to and tok(pos)[:s] != ';'
           pos += 1
@@ -178,9 +181,13 @@ class VerilogAnalyzer
         wire_name = tok(pos-1)[:s]
         wire = vmodule[:wires].select{|wire| wire[:name] == wire_name }
         wire[0][:dir] = s
-      when 'wire'
+      when s == 'wire'
         #TODO can be pin or internal wire
       #when id and then another id
+      when (tok(pos)[:type] == :id and tok(pos+1)[:type] == :id)
+        subm_class = tok(pos)[:s]
+        subm_name = tok(pos+1)[:s]
+        vmodule[:submodules] << {:type => subm_class, :name => subm_name}
       end
       pos += 1
     end
@@ -199,22 +206,24 @@ class AutoConnect
   def initialize(options, log)
     @options = options
     @log = log
+    @analyzer = Verp::VerilogAnalyzer.new
   end
 
   def run(input)
-    analyzer = Verp::VerilogAnalyzer.new
-    analyzer.run(input)
+    @analyzer.run(input)
+    auto_connect_modules
   end
 
-  def find_modules(text)
-    vmodules = []
-    begin_pos = scan_for('module', text)
-    vmodules
+  def auto_connect_modules
+    for vmodule in @analyzer.vmodules
+      next if not vmodule[:local]
+      submodules = vmodule[:submodules]
+      for submodule in submodules
+        puts "=========== NEED TO CONNECT ===========\n#{submodule}"
+      end
+    end
   end
 
-  def scan_for(s, text, pos = 0)
-    nil
-  end
 end
 
 end
