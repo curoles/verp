@@ -183,14 +183,41 @@ class VerilogAnalyzer
         wire[0][:dir] = s
       when s == 'wire'
         #TODO can be pin or internal wire
+        wire_name = tok(pos+1)[:s]; pos += 1 #FIXME
+        vmodule[:wires] << {:pin => false, :dir => 'input', :name => wire_name}
       #when id and then another id
       when (tok(pos)[:type] == :id and tok(pos+1)[:type] == :id)
         subm_class = tok(pos)[:s]
         subm_name = tok(pos+1)[:s]
-        vmodule[:submodules] << {:type => subm_class, :name => subm_name}
+        vsubmodule = {:type => subm_class, :name => subm_name, :pins => []}
+        pos = analyze_pin_connection(pos + 2, token_to, vsubmodule)
+        vmodule[:submodules] << vsubmodule
       end
       pos += 1
     end
+  end
+
+  def analyze_pin_connection(start_pos, end_pos, vsubmodule)
+    pos = start_pos
+    while pos < end_pos
+      s = tok(pos)[:s]
+      case
+      when s == ';'
+        return pos
+      when s == '('
+      when s == ')'
+      when (s == '.' and tok(pos+1)[:type] == :id)
+        pin_name = tok(pos+1)[:s]
+        external_pin = tok(pos+3)[:s]
+        puts "#{pin_name} connected to #{external_pin}"
+        vsubmodule[:pins] << {:name => pin_name, :ext => external_pin}
+      else
+        puts "!!! #{s}"
+      end
+      pos += 1
+    end
+
+    pos
   end
 
   def report_Verilog_syntax_error(message)
@@ -215,12 +242,31 @@ class AutoConnect
   end
 
   def auto_connect_modules
-    for vmodule in @analyzer.vmodules
+    @analyzer.vmodules.each do |vmodule|
       next if not vmodule[:local]
       submodules = vmodule[:submodules]
-      for submodule in submodules
-        puts "=========== NEED TO CONNECT ===========\n#{submodule}"
+      missing_wires = [];
+      submodules.each do |instance|
+        #puts "=========== NEED TO CONNECT ===========\n#{instance}"
+        type = instance[:type]
+        vmods_with_def = @analyzer.vmodules.select {|m| m[:name] == type}
+        if not vmods_with_def.empty?
+          vmod_with_def = vmods_with_def[0]
+          vmod_pins = vmod_with_def[:wires].select {|wire| wire[:pin]}
+          already_connected_pins = instance[:pins]
+          disconnected_pins = vmod_pins.select do |pin|
+            found = already_connected_pins.select {|p| p[:name]==pin[:name]}
+            found.empty?
+          end
+          puts ">>>>>>> disconnected pins:#{disconnected_pins}"
+          disconnected_pins.each do |p|
+            existing_wires_with_this_name = vmodule[:wires].select {|wire| wire[:name] == p[:name]}
+            wire_exist = !existing_wires_with_this_name.empty?
+            missing_wires << p[:name] unless (missing_wires.include?(p[:name]) or wire_exist)
+          end
+        end
       end
+      puts "+++ missing_wires: #{missing_wires} in #{vmodule[:name]}"
     end
   end
 

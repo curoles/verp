@@ -20,19 +20,17 @@ endmodule
 /* module DffTester
  *
  */
-module DffTester(input in, out);
+module DffTester(input q, d, input clk);
 
-output out;;;
-reg out;
-
-aa = bbb+cc;
-
-Dff dff;
+output d;
 
 endmodule
 
-  /*s o me other module*/
-module 
-Test2(a, output b);
+module Test;
+
+wire clk;
+
+Dff dff;
+DffTester tester(.clk(clk));
 
 endmodule
