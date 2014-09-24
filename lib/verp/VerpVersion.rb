@@ -10,10 +10,15 @@ License::      Distributed under the Boost Software License, Version 1.0.
 
 module Verp
 
-  VERSION_MAJOR = 0
-  VERSION_MINOR = 0
-  VERSION_DATE  = 20140903
+  VERSION_MAJOR   = 0
+  VERSION_MINOR   = 0
+  VERSION_RELEASE = 1
+  VERSION_DATE    = 20140923
 
-  VERSION = "#{VERSION_MAJOR}.#{VERSION_MINOR}.#{VERSION_DATE}"
+  VERSION = "#{VERSION_MAJOR}.#{VERSION_MINOR}.#{VERSION_RELEASE}"
+
+  def self.version
+    VERSION
+  end
 
 end
