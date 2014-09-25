@@ -8,6 +8,9 @@ License::      Distributed under the Boost Software License, Version 1.0.
 
 =end
 
+
+# VERP namespace module
+#
 module Verp
 
 class VerilogSyntaxError < RuntimeError
@@ -87,6 +90,7 @@ end
 class VerilogAnalyzer
 
   attr_reader :vmodules
+  attr_reader :input
 
   def initialize
     @tokens = []
@@ -94,6 +98,7 @@ class VerilogAnalyzer
   end
 
   def run(text)
+    @input = text
     scanner = Verp::VerilogScanner.new(text)
     @tokens = scanner.run
     @vmodules = find_modules
@@ -267,7 +272,22 @@ class AutoConnect
         end
       end
       puts "+++ missing_wires: #{missing_wires} in #{vmodule[:name]}"
+      add_missing_wires(vmodule, missing_wires) unless missing_wires.empty?
     end
+
+    @analyzer.input
+  end
+
+  def add_missing_wires(vmodule, missing_wires)
+    module_token_from = vmodule[:token_from]
+    module_token_to = vmodule[:token_to]
+    declaration_end = module_token_from
+    while @analyzer.tok(declaration_end)[:s] != ';' do
+      declaration_end += 1
+    end
+    insertion_point = @analyzer.tok(declaration_end+1)[:pos]
+    #FIXME
+    @analyzer.input.insert(insertion_point, "//missing wires\n")
   end
 
 end

@@ -8,10 +8,13 @@ License::      Distributed under the Boost Software License, Version 1.0.
 
 =end
 
+
 require 'optparse'
 require 'optparse/time'
 require 'ostruct'
 
+# VERP namespace module
+#
 module Verp
 
 class Options

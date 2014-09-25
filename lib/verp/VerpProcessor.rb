@@ -8,12 +8,15 @@ License::      Distributed under the Boost Software License, Version 1.0.
 
 =end
 
+
 require 'logger'
 require 'erb'
 
 require_relative 'VerpMethods'
 require_relative 'AutoConnect'
 
+# VERP namespace module
+#
 module Verp
 
 class Processor

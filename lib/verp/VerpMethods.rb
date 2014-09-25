@@ -8,6 +8,9 @@ License::      Distributed under the Boost Software License, Version 1.0.
 
 =end
 
+
+# VERP namespace module
+#
 module Verp
 
 # This exception is thrown when assert() expression returns false.

@@ -8,6 +8,9 @@ License::      Distributed under the Boost Software License, Version 1.0.
 
 =end
 
+
+# VERP namespace module
+#
 module Verp
 
   VERSION_MAJOR   = 0
